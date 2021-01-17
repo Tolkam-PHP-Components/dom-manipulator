@@ -2,12 +2,15 @@
 
 namespace Tolkam\DOM\Manipulator;
 
+use DOMCdataSection;
+use DOMComment;
 use DOMDocument;
 use DOMElement;
 use DOMNode;
 use DOMNodeList;
 use InvalidArgumentException;
 use LogicException;
+use RuntimeException;
 use Symfony\Component\DomCrawler\Crawler;
 
 /**
@@ -20,11 +23,6 @@ use Symfony\Component\DomCrawler\Crawler;
 class Manipulator extends Crawler
 {
     /**
-     * Root element name used when importing html fragments
-     */
-    private const FRAGMENT_ROOT_TAG = '_root';
-    
-    /**
      * Creates instance from a HTML string, DOMNode, DOMNodeList
      *
      * @param DOMNodeList|DOMNode|DOMNode[]|string|null|static $content
@@ -36,6 +34,54 @@ class Manipulator extends Crawler
         return $content instanceof static
             ? $content
             : new static($content);
+    }
+    
+    /**
+     * Creates a new element
+     *
+     * @param string     $name
+     * @param mixed|null $children
+     * @param array      $attributes
+     *
+     * @return DOMElement
+     */
+    public function createElement(
+        string $name,
+        $children = '',
+        array $attributes = []
+    ): DOMElement {
+        $element = $this->getDOMDocument()->createElement($name);
+        static::create($element)->append($children);
+        
+        foreach ($attributes as $k => $value) {
+            $element->setAttribute($k, $value);
+        }
+        
+        return $element;
+    }
+    
+    /**
+     * Creates new comment
+     *
+     * @param string $comment
+     *
+     * @return DOMComment
+     */
+    public function createComment(string $comment): DOMComment
+    {
+        return $this->getDOMDocument()->createComment($comment);
+    }
+    
+    /**
+     * Creates CDATA section
+     *
+     * @param string $contents
+     *
+     * @return DOMCdataSection
+     */
+    public function createCDATA(string $contents): DOMCdataSection
+    {
+        return $this->getDOMDocument()->createCDATASection($contents);
     }
     
     /**
@@ -79,6 +125,7 @@ class Manipulator extends Crawler
     public function after($content): self
     {
         $content = self::create($content);
+        
         $newNodes = [];
         foreach ($this as $i => $node) {
             /** @var DOMNode $node */
@@ -95,6 +142,7 @@ class Manipulator extends Crawler
                 $newNodes[] = $newNode;
             }
         }
+        
         $content->clear();
         $content->add($newNodes);
         
@@ -111,6 +159,7 @@ class Manipulator extends Crawler
     public function append($content): self
     {
         $content = self::create($content);
+        
         $newNodes = [];
         foreach ($this as $i => $node) {
             /** @var DOMNode $node */
@@ -121,6 +170,7 @@ class Manipulator extends Crawler
                 $newNodes[] = $newNode;
             }
         }
+        
         $content->clear();
         $content->add($newNodes);
         
@@ -137,6 +187,7 @@ class Manipulator extends Crawler
     public function appendTo($element): self
     {
         $e = self::create($element);
+        
         $newNodes = [];
         foreach ($e as $i => $node) {
             /** @var DOMNode $node */
@@ -196,6 +247,7 @@ class Manipulator extends Crawler
     public function before($content): self
     {
         $content = self::create($content);
+        
         $newNodes = [];
         foreach ($this as $i => $node) {
             /** @var DOMNode $node */
@@ -208,6 +260,7 @@ class Manipulator extends Crawler
                 }
             }
         }
+        
         $content->clear();
         $content->add($newNodes);
         
@@ -310,6 +363,7 @@ class Manipulator extends Crawler
     public function setInnerHtml($content): self
     {
         $content = self::create($content);
+        
         foreach ($this as $node) {
             $node->nodeValue = '';
             foreach ($content as $newNode) {
@@ -343,6 +397,7 @@ class Manipulator extends Crawler
     public function insertAfter($element): self
     {
         $e = self::create($element);
+        
         $newNodes = [];
         foreach ($e as $i => $node) {
             /** @var DOMNode $node */
@@ -373,6 +428,7 @@ class Manipulator extends Crawler
     public function insertBefore($element): self
     {
         $e = self::create($element);
+        
         $newNodes = [];
         foreach ($e as $i => $node) {
             /** @var DOMNode $node */
@@ -400,6 +456,7 @@ class Manipulator extends Crawler
     public function prepend($content): self
     {
         $content = self::create($content);
+        
         $newNodes = [];
         foreach ($this as $i => $node) {
             $refNode = $node->firstChild;
@@ -434,6 +491,7 @@ class Manipulator extends Crawler
     public function prependTo($element): self
     {
         $e = self::create($element);
+        
         $newNodes = [];
         foreach ($e as $i => $node) {
             $refNode = $node->firstChild;
@@ -531,6 +589,7 @@ class Manipulator extends Crawler
     public function replaceAll($element): self
     {
         $e = self::create($element);
+        
         $newNodes = [];
         foreach ($e as $i => $node) {
             /** @var DOMNode $node */
@@ -563,6 +622,7 @@ class Manipulator extends Crawler
     public function replaceWith($content): self
     {
         $content = self::create($content);
+        
         $newNodes = [];
         foreach ($this as $i => $node) {
             /** @var DOMNode $node */
@@ -580,6 +640,7 @@ class Manipulator extends Crawler
                 $newNodes[] = $newNode;
             }
         }
+        
         $content->clear();
         $content->add($newNodes);
         
@@ -613,6 +674,7 @@ class Manipulator extends Crawler
     public function setText(string $text): self
     {
         $text = htmlspecialchars($text);
+        
         foreach ($this as $node) {
             /** @var DOMNode $node */
             $node->nodeValue = $text;
@@ -632,6 +694,7 @@ class Manipulator extends Crawler
     public function toggleClass(string $classname): self
     {
         $classes = explode(' ', $classname);
+        
         foreach ($this as $i => $node) {
             $c = self::create($node);
             /** @var DOMNode $node */
@@ -704,6 +767,7 @@ class Manipulator extends Crawler
     public function wrap($wrappingElement): self
     {
         $content = self::create($wrappingElement);
+        
         $newNodes = [];
         foreach ($this as $i => $node) {
             /** @var DOMNode $node */
@@ -734,6 +798,7 @@ class Manipulator extends Crawler
             $newNode->appendChild($oldNode);
             $newNodes[] = $newNode;
         }
+        
         $content->clear();
         $content->add($newNodes);
         
@@ -750,6 +815,7 @@ class Manipulator extends Crawler
     public function wrapAll($content): self
     {
         $content = self::create($content);
+        
         $parent = $this->getNode(0)->parentNode;
         foreach ($this as $i => $node) {
             /** @var DOMNode $node */
@@ -765,6 +831,7 @@ class Manipulator extends Crawler
         $newNode = static::importNewNode($newNode, $parent);
         
         $newNode = $parent->insertBefore($newNode, $this->getNode(0));
+        
         $content->clear();
         $content->add($newNode);
         
@@ -808,43 +875,6 @@ class Manipulator extends Crawler
     }
     
     /**
-     * Gets the HTML code fragment of all elements and their contents
-     *
-     * If the first node contains a complete HTML document return only
-     * the full code of this document
-     *
-     * @return string
-     */
-    public function saveHTML(): string
-    {
-        $rootTag = self::FRAGMENT_ROOT_TAG;
-        
-        if ($this->isHtmlDocument()) {
-            return $this->getDOMDocument()->saveHTML();
-        }
-        else {
-            $doc = new DOMDocument('1.0', 'UTF-8');
-            $root = $doc->appendChild($doc->createElement($rootTag));
-            foreach ($this as $node) {
-                $root->appendChild($doc->importNode($node, true));
-            }
-            $html = trim($doc->saveHTML());
-            
-            $pattern = '~^<' . $rootTag . '[^>]*>|</' . $rootTag . '>$~';
-            
-            return preg_replace($pattern, '', $html);
-        }
-    }
-    
-    /**
-     * @return string
-     */
-    public function __toString(): string
-    {
-        return $this->saveHTML();
-    }
-    
-    /**
      * Checks whether the first node contains a complete html document
      * (as opposed to a document fragment)
      *
@@ -873,14 +903,12 @@ class Manipulator extends Crawler
     public function getDOMDocument(): ?DOMDocument
     {
         $node = $this->getNode(0);
-        $r = null;
-        if ($node instanceof DOMElement
-            && $node->ownerDocument instanceof DOMDocument
-        ) {
-            $r = $node->ownerDocument;
+        
+        if ($node instanceof DOMElement && $node->ownerDocument instanceof DOMDocument) {
+            return $node->ownerDocument;
         }
         
-        return $r;
+        throw new RuntimeException('Unable to get DOMDocument');
     }
     
     /**
@@ -922,8 +950,9 @@ class Manipulator extends Crawler
     {
         $d = new DOMDocument('1.0', $charset);
         $d->preserveWhiteSpace = false;
-        $root = $d->appendChild($d->createElement(self::FRAGMENT_ROOT_TAG));
+        $root = $d->appendChild($d->createElement('__tmp__'));
         $bodyNode = Util::getBodyNodeFromHtmlFragment($content, $charset);
+        
         foreach ($bodyNode->childNodes as $child) {
             $inode = $root->appendChild($d->importNode($child, true));
             if ($inode) {
@@ -955,22 +984,51 @@ class Manipulator extends Crawler
     }
     
     /**
-     * Gets the nodes count
+     * Gets the HTML code fragment of all elements and their contents
      *
-     * @return int
+     * If the first node contains a complete HTML document return only
+     * the full code of this document
+     *
+     * @return string
      */
-    public function length(): int
+    public function mergeToString(): string
     {
-        return count($this);
+        $rootTag = '__tmp__';
+        
+        if ($this->isHtmlDocument()) {
+            return $this->getDOMDocument()->saveHTML();
+        }
+        else {
+            $doc = new DOMDocument('1.0', 'UTF-8');
+            $root = $doc->appendChild($doc->createElement($rootTag));
+            foreach ($this as $node) {
+                $root->appendChild($doc->importNode($node, true));
+            }
+            $html = trim($doc->saveHTML());
+            
+            $pattern = '~^<' . $rootTag . '[^>]*>|</' . $rootTag . '>$~';
+            
+            return preg_replace($pattern, '', $html);
+        }
+    }
+    
+    /**
+     * @return string
+     */
+    public function __toString(): string
+    {
+        return $this->outerHtml();
     }
     
     public function __clone()
     {
         $newNodes = [];
+        
         foreach ($this as $node) {
             /** @var DOMNode $node */
             $newNodes[] = $node->cloneNode(true);
         }
+        
         $this->clear();
         $this->add($newNodes);
     }
@@ -991,10 +1049,9 @@ class Manipulator extends Crawler
             $referenceNode->ownerDocument->preserveWhiteSpace = false;
             $newNode = $referenceNode->ownerDocument->importNode($newNode, true);
         }
-        else {
-            if ($clone) {
-                $newNode = $newNode->cloneNode(true);
-            }
+        
+        if ($clone) {
+            $newNode = $newNode->cloneNode(true);
         }
         
         return $newNode;

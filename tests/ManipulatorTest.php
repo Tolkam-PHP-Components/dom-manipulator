@@ -73,7 +73,7 @@ class ManipulatorTest extends TestCase
         $this->assertEquals(3, count($paragraphs));
         
         $paragraphs->append('<span class="appended">.</span>');
-        $this->assertEquals('<p>Ein neuer <b>Inhalt</b><span class="appended">.</span></p><p class="a2">Zweiter Absatz<span class="appended">.</span></p><p class="a3"><b>Dritter Absatz</b> und noch mehr Text<span class="appended">.</span></p>', $c->filter('p')->saveHTML());
+        $this->assertEquals('<p>Ein neuer <b>Inhalt</b><span class="appended">.</span></p><p class="a2">Zweiter Absatz<span class="appended">.</span></p><p class="a3"><b>Dritter Absatz</b> und noch mehr Text<span class="appended">.</span></p>', $c->filter('p')->mergeToString());
         
         $body->makeEmpty();
         $this->assertEmpty($body->html());
@@ -90,22 +90,22 @@ class ManipulatorTest extends TestCase
         // Testing append string to several elements
         $c = new Manipulator('<p>Paragraph 1</p><p>Paragraph 2</p><p>Paragraph 3</p>');
         $c->filter('p')->append('<br>Appended Text');
-        $this->assertEquals('<p>Paragraph 1<br>Appended Text</p><p>Paragraph 2<br>Appended Text</p><p>Paragraph 3<br>Appended Text</p>', $c->saveHTML());
+        $this->assertEquals('<p>Paragraph 1<br>Appended Text</p><p>Paragraph 2<br>Appended Text</p><p>Paragraph 3<br>Appended Text</p>', $c->mergeToString());
         
         // Testing append HtmlPageCrawler to several elements
         $c = new Manipulator('<p>Paragraph 1</p><p>Paragraph 2</p><p>Paragraph 3</p>');
         $c->filter('p')->append(new Manipulator('<br>Appended Text'));
-        $this->assertEquals('<p>Paragraph 1<br>Appended Text</p><p>Paragraph 2<br>Appended Text</p><p>Paragraph 3<br>Appended Text</p>', $c->saveHTML());
+        $this->assertEquals('<p>Paragraph 1<br>Appended Text</p><p>Paragraph 2<br>Appended Text</p><p>Paragraph 3<br>Appended Text</p>', $c->mergeToString());
         
         // Testing append DOMNode to several elements
         $c = new Manipulator('<p>Paragraph 1</p><p>Paragraph 2</p><p>Paragraph 3</p>');
         $app = $c->getDOMDocument()->createElement('span', 'Appended Text');
         $c->filter('p')->append($app);
-        $this->assertEquals('<p>Paragraph 1<span>Appended Text</span></p><p>Paragraph 2<span>Appended Text</span></p><p>Paragraph 3<span>Appended Text</span></p>', $c->saveHTML());
+        $this->assertEquals('<p>Paragraph 1<span>Appended Text</span></p><p>Paragraph 2<span>Appended Text</span></p><p>Paragraph 3<span>Appended Text</span></p>', $c->mergeToString());
         
         $c = new Manipulator('<div id="content"><span>Append Self</span></div>');
         $c->filter('#content')->append($c->filter('span'));
-        $this->assertEquals('<div id="content"><span>Append Self</span></div>', $c->saveHTML());
+        $this->assertEquals('<div id="content"><span>Append Self</span></div>', $c->mergeToString());
     }
     
     /**
@@ -115,11 +115,11 @@ class ManipulatorTest extends TestCase
     {
         $c = new Manipulator('<div id="content"><h1>Title</h1><em>Big</em></div>');
         $c->filter('em')->appendTo($c->filter('h1'));
-        $this->assertEquals('<div id="content"><h1>Title<em>Big</em></h1></div>', $c->saveHTML());
+        $this->assertEquals('<div id="content"><h1>Title<em>Big</em></h1></div>', $c->mergeToString());
         
         $c = new Manipulator('<div id="content"><h1>Self Title</h1></div>');
         $c->filter('h1')->appendTo($c->filter('h1'));
-        $this->assertEquals('<div id="content"><h1>Self Title</h1></div>', $c->saveHTML());
+        $this->assertEquals('<div id="content"><h1>Self Title</h1></div>', $c->mergeToString());
     }
     
     /**
@@ -152,14 +152,14 @@ class ManipulatorTest extends TestCase
         $dom = new DOMDocument('1.0', 'UTF-8');
         $dom->loadHTML($html);
         $c = new Manipulator($dom);
-        $this->assertEquals($html, $this->_ignoreNewlines($c->saveHTML()));
+        $this->assertEquals($html, $this->_ignoreNewlines($c->mergeToString()));
         $ps = $c->filter('p');
-        $this->assertEquals('<p>Paragraph 1</p><p>Paragraph 2</p>', $ps->saveHTML());
+        $this->assertEquals('<p>Paragraph 1</p><p>Paragraph 2</p>', $ps->mergeToString());
         $t = $c->filter('h1');
-        $this->assertEquals('<h1>Title</h1>', $t->saveHTML());
+        $this->assertEquals('<h1>Title</h1>', $t->mergeToString());
         
         $c = new Manipulator('<div id="content"><h1>Title</h1></div>');
-        $this->assertEquals('<div id="content"><h1>Title</h1></div>', $c->saveHTML());
+        $this->assertEquals('<div id="content"><h1>Title</h1></div>', $c->mergeToString());
     }
     
     /**
@@ -179,11 +179,11 @@ class ManipulatorTest extends TestCase
         $t->setStyle('margin-bottom', '20px');
         $this->assertEquals('20px', $t->getStyle('margin-bottom'));
         $this->assertEquals('10px', $t->getStyle('margin-top'));
-        $this->assertEquals('<h1 style="margin-top: 10px;border-bottom: 1px solid red;margin-bottom: 20px;">Title</h1>', $t->saveHTML());
+        $this->assertEquals('<h1 style="margin-top: 10px;border-bottom: 1px solid red;margin-bottom: 20px;">Title</h1>', $t->mergeToString());
         $t->setStyle('border-bottom', '');
-        $this->assertEquals('<h1 style="margin-top: 10px;margin-bottom: 20px;">Title</h1>', $t->saveHTML());
+        $this->assertEquals('<h1 style="margin-top: 10px;margin-bottom: 20px;">Title</h1>', $t->mergeToString());
         $t->setStyle('padding-top', '0');
-        $this->assertEquals('<h1 style="margin-top: 10px;margin-bottom: 20px;padding-top: 0;">Title</h1>', $t->saveHTML());
+        $this->assertEquals('<h1 style="margin-top: 10px;margin-bottom: 20px;padding-top: 0;">Title</h1>', $t->mergeToString());
         $this->assertEquals('0', $t->getStyle('padding-top'));
         $this->assertNull($t->getStyle('border-bottom'));
     }
@@ -202,7 +202,7 @@ class ManipulatorTest extends TestCase
         $t->addClass('ueberschrift');
         $t->addClass('nochneklasse');
         $t->addClass('style_class');
-        $this->assertEquals('<h1 class="style_class ueberschrift nochneklasse">Title</h1>', $t->saveHTML());
+        $this->assertEquals('<h1 class="style_class ueberschrift nochneklasse">Title</h1>', $t->mergeToString());
         $this->assertTrue($t->hasClass('ueberschrift'));
         $this->assertTrue($t->hasClass('nochneklasse'));
         $this->assertTrue($t->hasClass('style_class'));
@@ -227,17 +227,17 @@ class ManipulatorTest extends TestCase
         $this->assertEquals(
             '<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">'
             . "" . '<html><body><div id="content"><h1>Title</h1></div></body></html>' . "",
-            $this->_ignoreNewlines($c->saveHTML())
+            $this->_ignoreNewlines($c->mergeToString())
         );
         
         $c = new Manipulator;
         $c->addContent('<div id="content"><h1>Title');
-        $this->assertEquals('<div id="content"><h1>Title</h1></div>', $c->saveHTML());
+        $this->assertEquals('<div id="content"><h1>Title</h1></div>', $c->mergeToString());
         
         $c = new Manipulator;
         $c->addContent('<p>asdf<p>asdfaf</p>');
         $this->assertEquals(2, count($c));
-        $this->assertEquals('<p>asdf</p><p>asdfaf</p>', $c->saveHTML());
+        $this->assertEquals('<p>asdf</p><p>asdfaf</p>', $c->mergeToString());
     }
     
     /**
@@ -247,15 +247,15 @@ class ManipulatorTest extends TestCase
     {
         $c = new Manipulator('<div id="content"><h1>Title</h1></div>');
         $c->filter('h1')->before('<p>Text before h1</p>');
-        $this->assertEquals('<div id="content"><p>Text before h1</p><h1>Title</h1></div>', $c->saveHTML());
+        $this->assertEquals('<div id="content"><p>Text before h1</p><h1>Title</h1></div>', $c->mergeToString());
         
         $c = new Manipulator('<div id="content"><h1>Title</h1></div>');
         $c->filter('h1')->before(new Manipulator('<p>Text before h1</p><p>and more text before</p>'));
-        $this->assertEquals('<div id="content"><p>Text before h1</p><p>and more text before</p><h1>Title</h1></div>', $c->saveHTML());
+        $this->assertEquals('<div id="content"><p>Text before h1</p><p>and more text before</p><h1>Title</h1></div>', $c->mergeToString());
         
         $c = new Manipulator('<div id="content"><h1>Self Before</h1></div>');
         $c->filter('h1')->before($c->filter('h1'));
-        $this->assertEquals('<div id="content"><h1>Self Before</h1></div>', $c->saveHTML());
+        $this->assertEquals('<div id="content"><h1>Self Before</h1></div>', $c->mergeToString());
     }
     
     /**
@@ -265,11 +265,11 @@ class ManipulatorTest extends TestCase
     {
         $c = new Manipulator('<div id="content"><h1>Title</h1><p>Text before h1</p></div>');
         $c->filter('p')->insertBefore($c->filter('h1'));
-        $this->assertEquals('<div id="content"><p>Text before h1</p><h1>Title</h1></div>', $c->saveHTML());
+        $this->assertEquals('<div id="content"><p>Text before h1</p><h1>Title</h1></div>', $c->mergeToString());
         
         $c = new Manipulator('<div id="content"><h1>Self Insert Before Title</h1><p>Text after h1</p></div>');
         $c->filter('h1')->insertBefore($c->filter('h1'));
-        $this->assertEquals('<div id="content"><h1>Self Insert Before Title</h1><p>Text after h1</p></div>', $c->saveHTML());
+        $this->assertEquals('<div id="content"><h1>Self Insert Before Title</h1><p>Text after h1</p></div>', $c->mergeToString());
     }
     
     /**
@@ -279,15 +279,15 @@ class ManipulatorTest extends TestCase
     {
         $c = new Manipulator('<div id="content"><h1>Title</h1></div>');
         $c->filter('h1')->after('<p>Text after h1</p>');
-        $this->assertEquals('<div id="content"><h1>Title</h1><p>Text after h1</p></div>', $c->saveHTML());
+        $this->assertEquals('<div id="content"><h1>Title</h1><p>Text after h1</p></div>', $c->mergeToString());
         
         $c = new Manipulator('<div id="content"><h1>Title</h1><h1>Title2</h1></div>');
         $c->filter('h1')->after(new Manipulator('<p>Text after h1</p><p>and more text after</p>'));
-        $this->assertEquals('<div id="content"><h1>Title</h1><p>Text after h1</p><p>and more text after</p><h1>Title2</h1><p>Text after h1</p><p>and more text after</p></div>', $c->saveHTML());
+        $this->assertEquals('<div id="content"><h1>Title</h1><p>Text after h1</p><p>and more text after</p><h1>Title2</h1><p>Text after h1</p><p>and more text after</p></div>', $c->mergeToString());
         
         $c = new Manipulator('<div id="content"><h1>Self After</h1></div>');
         $c->filter('h1')->after($c->filter('h1'));
-        $this->assertEquals('<div id="content"><h1>Self After</h1></div>', $c->saveHTML());
+        $this->assertEquals('<div id="content"><h1>Self After</h1></div>', $c->mergeToString());
     }
     
     /**
@@ -297,11 +297,11 @@ class ManipulatorTest extends TestCase
     {
         $c = new Manipulator('<div id="content"><p>Text after h1</p><h1>Title</h1></div>');
         $c->filter('p')->insertAfter($c->filter('h1'));
-        $this->assertEquals('<div id="content"><h1>Title</h1><p>Text after h1</p></div>', $c->saveHTML());
+        $this->assertEquals('<div id="content"><h1>Title</h1><p>Text after h1</p></div>', $c->mergeToString());
         
         $c = new Manipulator('<div id="content"><p>Text before h1</p><h1>Self Insert After Title</h1></div>');
         $c->filter('h1')->insertAfter($c->filter('h1'));
-        $this->assertEquals('<div id="content"><p>Text before h1</p><h1>Self Insert After Title</h1></div>', $c->saveHTML());
+        $this->assertEquals('<div id="content"><p>Text before h1</p><h1>Self Insert After Title</h1></div>', $c->mergeToString());
     }
     
     /**
@@ -311,15 +311,15 @@ class ManipulatorTest extends TestCase
     {
         $c = new Manipulator('<div id="content"><h1>Title</h1></div>');
         $c->filter('#content')->prepend('<p>Text before h1</p>');
-        $this->assertEquals('<div id="content"><p>Text before h1</p><h1>Title</h1></div>', $c->saveHTML());
+        $this->assertEquals('<div id="content"><p>Text before h1</p><h1>Title</h1></div>', $c->mergeToString());
         
         $c = new Manipulator('<div id="content"></div>');
         $c->filter('#content')->prepend(new Manipulator('<p>Text before h1</p><p>and more text before</p>'));
-        $this->assertEquals('<div id="content"><p>Text before h1</p><p>and more text before</p></div>', $c->saveHTML());
+        $this->assertEquals('<div id="content"><p>Text before h1</p><p>and more text before</p></div>', $c->mergeToString());
         
         $c = new Manipulator('<div id="content"><span>Prepend Self</span></div>');
         $c->filter('#content')->prepend($c->filter('span'));
-        $this->assertEquals('<div id="content"><span>Prepend Self</span></div>', $c->saveHTML());
+        $this->assertEquals('<div id="content"><span>Prepend Self</span></div>', $c->mergeToString());
     }
     
     /**
@@ -329,19 +329,19 @@ class ManipulatorTest extends TestCase
     {
         $c = new Manipulator('<div id="content"><p>Text before</p></div>');
         $c->filter('p')->prependTo('Text');
-        $this->assertEquals('<div id="content"><p>Text before</p></div>', $c->saveHTML());
+        $this->assertEquals('<div id="content"><p>Text before</p></div>', $c->mergeToString());
         
         $c = new Manipulator('<div id="content"><h1>Title</h1></div>');
         $c->filter('#content')->prependTo(new Manipulator('<p>paragraph</p>'));
-        $this->assertEquals('<div id="content"><h1>Title</h1></div>', $c->saveHTML());
+        $this->assertEquals('<div id="content"><h1>Title</h1></div>', $c->mergeToString());
         
         $c = new Manipulator('<div id="content"><h1>Title</h1><em>Big</em></div>');
         $c->filter('em')->prependTo($c->filter('h1'));
-        $this->assertEquals('<div id="content"><h1><em>Big</em>Title</h1></div>', $c->saveHTML());
+        $this->assertEquals('<div id="content"><h1><em>Big</em>Title</h1></div>', $c->mergeToString());
         
         $c = new Manipulator('<div id="content"><h1>Self Title</h1></div>');
         $c->filter('h1')->prependTo($c->filter('h1'));
-        $this->assertEquals('<div id="content"><h1>Self Title</h1></div>', $c->saveHTML());
+        $this->assertEquals('<div id="content"><h1>Self Title</h1></div>', $c->mergeToString());
     }
     
     /**
@@ -351,31 +351,31 @@ class ManipulatorTest extends TestCase
     {
         $c = new Manipulator('<div id="content"><h1>Title</h1></div>');
         $c->filter('h1')->wrap('<div class="innercontent">');
-        $this->assertEquals('<div id="content"><div class="innercontent"><h1>Title</h1></div></div>', $c->saveHTML());
+        $this->assertEquals('<div id="content"><div class="innercontent"><h1>Title</h1></div></div>', $c->mergeToString());
         
         $c = new Manipulator('<div id="content"><h1>Title</h1></div>');
         $c->filter('h1')->wrap('<div class="ic">asdf<div class="a1"><div class="a2"></div></div></div></div>');
-        $this->assertEquals('<div id="content"><div class="ic">asdf<div class="a1"><div class="a2"><h1>Title</h1></div></div></div></div>', $c->saveHTML());
+        $this->assertEquals('<div id="content"><div class="ic">asdf<div class="a1"><div class="a2"><h1>Title</h1></div></div></div></div>', $c->mergeToString());
         
         $c = new Manipulator('<div id="content"><h1>Title</h1></div>');
-        $c->filter('h1')->wrap('<div class="ic">asdf</div><div>jkl</div>');                                      // wrap has more than 1 root element
-        $this->assertEquals('<div id="content"><div class="ic">asdf<h1>Title</h1></div></div>', $c->saveHTML()); // only first element is used
+        $c->filter('h1')->wrap('<div class="ic">asdf</div><div>jkl</div>');                                           // wrap has more than 1 root element
+        $this->assertEquals('<div id="content"><div class="ic">asdf<h1>Title</h1></div></div>', $c->mergeToString()); // only first element is used
         
         // Test for wrapping multiple nodes
         $c = new Manipulator('<div id="content"><p>p1</p><p>p2</p></div>');
         $c->filter('p')->wrap('<div class="p"></div>');
-        $this->assertEquals('<div id="content"><div class="p"><p>p1</p></div><div class="p"><p>p2</p></div></div>', $c->saveHTML());
+        $this->assertEquals('<div id="content"><div class="p"><p>p1</p></div><div class="p"><p>p2</p></div></div>', $c->mergeToString());
         
         $c = new Manipulator('plain text node');
         $c->wrap('<div class="ic"></div>');
-        $this->assertEquals('<div class="ic">plain text node</div>', $c->parents()->eq(0)->saveHTML());
+        $this->assertEquals('<div class="ic">plain text node</div>', $c->parents()->eq(0)->mergeToString());
         
         $c = Manipulator::create('<div>');
         $m = Manipulator::create('message 1')->appendTo($c);
         $m->wrap('<p>');
         $m = Manipulator::create('message 2')->appendTo($c);
         $m->wrap('<p>');
-        $this->assertEquals('<div><p>message 1</p><p>message 2</p></div>', $c->saveHTML());
+        $this->assertEquals('<div><p>message 1</p><p>message 2</p></div>', $c->mergeToString());
     }
     
     /**
@@ -385,8 +385,8 @@ class ManipulatorTest extends TestCase
     {
         $c = Manipulator::create('<div id="content"><p>Absatz 1</p><p>Absatz 2</p><p>Absatz 3</p></div>');
         $oldparagraphs = $c->filter('p')->replaceWith('<div>newtext 1</div><div>newtext 2</div>');
-        $this->assertEquals('<div id="content"><div>newtext 1</div><div>newtext 2</div><div>newtext 1</div><div>newtext 2</div><div>newtext 1</div><div>newtext 2</div></div>', $c->saveHTML());
-        $this->assertEquals('<p>Absatz 1</p><p>Absatz 2</p><p>Absatz 3</p>', $oldparagraphs->saveHTML());
+        $this->assertEquals('<div id="content"><div>newtext 1</div><div>newtext 2</div><div>newtext 1</div><div>newtext 2</div><div>newtext 1</div><div>newtext 2</div></div>', $c->mergeToString());
+        $this->assertEquals('<p>Absatz 1</p><p>Absatz 2</p><p>Absatz 3</p>', $oldparagraphs->mergeToString());
     }
     
     /**
@@ -397,7 +397,7 @@ class ManipulatorTest extends TestCase
         $c = Manipulator::create('<div id="content"><p>Absatz 1</p><p>Absatz 2</p><p>Absatz 3</p></div>');
         $new = Manipulator::create('<div>newtext 1</div><div>newtext 2</div>');
         $new->replaceAll($c->filter('p'));
-        $this->assertEquals('<div id="content"><div>newtext 1</div><div>newtext 2</div><div>newtext 1</div><div>newtext 2</div><div>newtext 1</div><div>newtext 2</div></div>', $c->saveHTML());
+        $this->assertEquals('<div id="content"><div>newtext 1</div><div>newtext 2</div><div>newtext 1</div><div>newtext 2</div><div>newtext 1</div><div>newtext 2</div></div>', $c->mergeToString());
     }
     
     /**
@@ -407,12 +407,12 @@ class ManipulatorTest extends TestCase
     {
         $c = Manipulator::create('<div id="content"><div>Before</div><p>Absatz 1</p><div>Inner</div><p>Absatz 2</p><p>Absatz 3</p><div>After</div></div>');
         $c->filter('p')->wrapAll('<div class="a">');
-        $this->assertEquals('<div id="content"><div>Before</div><div class="a"><p>Absatz 1</p><p>Absatz 2</p><p>Absatz 3</p></div><div>Inner</div><div>After</div></div>', $c->saveHTML());
+        $this->assertEquals('<div id="content"><div>Before</div><div class="a"><p>Absatz 1</p><p>Absatz 2</p><p>Absatz 3</p></div><div>Inner</div><div>After</div></div>', $c->mergeToString());
         
         // Test for wrapping with elements that have children
         $c = Manipulator::create('<div id="content"><p>Absatz 1</p><p>Absatz 2</p><p>Absatz 3</p></div>');
         $c->filter('p')->wrapAll('<article><section><div class="a"></div></section></article>');
-        $this->assertEquals('<div id="content"><article><section><div class="a"><p>Absatz 1</p><p>Absatz 2</p><p>Absatz 3</p></div></section></article></div>', $c->saveHTML());
+        $this->assertEquals('<div id="content"><article><section><div class="a"><p>Absatz 1</p><p>Absatz 2</p><p>Absatz 3</p></div></section></article></div>', $c->mergeToString());
     }
     
     /**
@@ -422,7 +422,7 @@ class ManipulatorTest extends TestCase
     {
         $c = Manipulator::create('<div id="content"><p>Absatz 1</p><p>Absatz 2</p><p>Absatz 3</p></div>');
         $c->wrapInner('<div class="a">');
-        $this->assertEquals('<div id="content"><div class="a"><p>Absatz 1</p><p>Absatz 2</p><p>Absatz 3</p></div></div>', $c->saveHTML());
+        $this->assertEquals('<div id="content"><div class="a"><p>Absatz 1</p><p>Absatz 2</p><p>Absatz 3</p></div></div>', $c->mergeToString());
     }
     
     /**
@@ -433,7 +433,7 @@ class ManipulatorTest extends TestCase
         $c = Manipulator::create('<div id="content"><div>Before</div><div class="a"><p>Absatz 1</p></div><div>After</div></div>');
         $p = $c->filter('p');
         $p->unwrap();
-        $this->assertEquals('<div id="content"><div>Before</div><p>Absatz 1</p><div>After</div></div>', $c->saveHTML());
+        $this->assertEquals('<div id="content"><div>Before</div><p>Absatz 1</p><div>After</div></div>', $c->mergeToString());
     }
     
     public function testUnwrapInnerOnDOMElementExeption()
@@ -455,7 +455,7 @@ class ManipulatorTest extends TestCase
         $c = Manipulator::create('<div id="content"><div>Before</div><div class="a"><p>Absatz 1</p></div><div>After</div></div>');
         $p = $c->filter('div.a');
         $p->unwrapInner();
-        $this->assertEquals('<div id="content"><div>Before</div><p>Absatz 1</p><div>After</div></div>', $c->saveHTML());
+        $this->assertEquals('<div id="content"><div>Before</div><p>Absatz 1</p><div>After</div></div>', $c->mergeToString());
     }
     
     /**
@@ -465,7 +465,7 @@ class ManipulatorTest extends TestCase
     {
         $c = Manipulator::create('<div id="1" class="a c"><div id="2" class="b c"></div></div>');
         $c->filter('div')->toggleClass('a d')->toggleClass('b');
-        $this->assertEquals('<div id="1" class="c d b"><div id="2" class="c a d"></div></div>', $c->saveHTML());
+        $this->assertEquals('<div id="1" class="c d b"><div id="2" class="c a d"></div></div>', $c->mergeToString());
     }
     
     public function testRemove()
@@ -539,7 +539,7 @@ END;
 <p style="margin: 0cm 0cm 0pt;"><span>Die Burse&nbsp;wurde unmittelbar (1478 bis 1482) nach der Universit&auml;tsgr&uuml;ndung als Studentenwohnhaus und -lehranstalt errichtet. Hier lehrte der Humanist und Reformator Philipp Melanchthon bis zu seiner Berufung nach Wittenberg 1518, an ihn erinnert eine Gedenktafel. 1803 bis 1805 wurde das Geb&auml;ude im Stil des Klassizismus zum ersten T&uuml;binger Klinikum umgebaut. Einer der ersten Patienten war Friedrich H&ouml;lderlin, der nach einer 231 Tage dauernden Behandlung am 3. Mai 1807 als unheilbar entlassen wurde.</span></p><p style="margin: 0cm 0cm 0pt;"><span>Einst Badeanstalt vor der Stadtmauer. Wer durch das kleine Stadttor geht, hat &ndash; r&uuml;ckw&auml;rts gewandt &ndash; einen guten Blick auf die Stadtbefestigung mit "Pechnasen" und Spuren des alten Wehrgangs.</span></p>
 END;
         
-        $this->assertEquals($expected, $c->filter('p')->saveHTML());
+        $this->assertEquals($expected, $c->filter('p')->mergeToString());
     }
     
     public function testAttr()
@@ -662,7 +662,7 @@ END;
         $this->assertTrue($p->hasClass('x'));
         $this->assertFalse($p1->hasClass('x'));
         $p->after($p1);
-        $this->assertEquals('<div><p class="x">asdf</p><p class="">asdf</p></div>', $c->saveHTML());
+        $this->assertEquals('<div><p class="x">asdf</p><p class="">asdf</p></div>', $c->outerHtml());
     }
     
     public function testGetCombinedText()
@@ -679,13 +679,6 @@ END;
         $this->assertEquals('"', $c->text());
         $c->setText('&');
         $this->assertEquals('&', $c->text());
-    }
-    
-    public function tesLength()
-    {
-        // $crawler->length() should give us the number of nodes in the crawler
-        $c = Manipulator::create('<p>abc</p><p>def</p>');
-        $this->assertEquals(2, $c->length());
     }
     
     /**
