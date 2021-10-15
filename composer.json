@@ -1,8 +1,20 @@
 {
     "name": "tolkam/dom-manipulator",
-    "description": "Eases DOM reading and modification",
+    "description": "Tools for DOM reading and manipulation",
     "type": "library",
     "license": "proprietary",
+    "authors": [
+        {
+            "name": "Christoph Singer",
+            "email": "singer@webagentur72.de",
+            "homepage": "https://www.webagentur72.de"
+        },
+        {
+            "name": "Kanstantsin Kulesh",
+            "email": "kk@tolkam.com",
+            "homepage": "https://www.tolkam.com"
+        }
+    ],
     "autoload": {
         "psr-4": {
             "Tolkam\\DOM\\Manipulator\\": "src",
@@ -14,16 +26,11 @@
         "ext-dom": "*",
         "ext-libxml": "*",
         "ext-mbstring": "*",
-        "symfony/dom-crawler": "^5.2.1",
+        "symfony/dom-crawler": "^5.2",
         "symfony/css-selector": "^5.2",
         "masterminds/html5": "^2.7"
     },
     "require-dev": {
-        "phpunit/phpunit": "^8.5.12"
-    },
-    "extra": {
-        "branch-alias": {
-            "dev-master": "1.0-dev"
-        }
+        "phpunit/phpunit": "^8.5"
     }
 }

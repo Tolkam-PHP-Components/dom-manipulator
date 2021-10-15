@@ -6,6 +6,10 @@ use DOMDocument;
 use DOMNode;
 use const LIBXML_VERSION;
 
+/**
+ * @package Tolkam\DOM\Manipulator
+ * @author  Christoph Singer
+ */
 class Util
 {
     /**
@@ -77,8 +81,10 @@ class Util
      *
      * @return DOMNode
      */
-    public static function getBodyNodeFromHtmlFragment(string $html, $charset = 'UTF-8'): DOMNode
-    {
+    public static function getBodyNodeFromHtmlFragment(
+        string $html,
+        string $charset = 'UTF-8'
+    ): DOMNode {
         $unsafeLibXml = LIBXML_VERSION < 20900;
         $html = '<html><body>' . $html . '</body></html>';
         $current = libxml_use_internal_errors(true);

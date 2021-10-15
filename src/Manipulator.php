@@ -18,12 +18,13 @@ use Symfony\Component\DomCrawler\Crawler;
  *
  * @see    https://github.com/wasinger/htmlpagedom
  * @author Christoph Singer
+ * @author Kanstantsin Kulesh
  *
  */
 class Manipulator extends Crawler
 {
     /**
-     * Creates instance from a HTML string, DOMNode, DOMNodeList
+     * Creates instance from an HTML string, DOMNode, DOMNodeList
      *
      * @param DOMNodeList|DOMNode|DOMNode[]|string|null|static $content
      *
@@ -288,7 +289,7 @@ class Manipulator extends Crawler
     {
         $styles = Util::cssStringToArray($this->getAttribute('style'));
         
-        return (isset($styles[$key]) ? $styles[$key] : null);
+        return $styles[$key] ?? null;
     }
     
     /**
@@ -685,7 +686,7 @@ class Manipulator extends Crawler
     
     /**
      * Adds or removes one or more classes from each element
-     * in the set of matched elements, depending the class’s presence
+     * in the set of matched elements, depending on the class’s presence
      *
      * @param string $classname
      *
@@ -946,7 +947,7 @@ class Manipulator extends Crawler
      *
      * @return void
      */
-    public function addHtmlFragment($content, $charset = 'UTF-8'): void
+    public function addHtmlFragment($content, string $charset = 'UTF-8'): void
     {
         $d = new DOMDocument('1.0', $charset);
         $d->preserveWhiteSpace = false;

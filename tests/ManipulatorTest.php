@@ -8,6 +8,13 @@ use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use Tolkam\DOM\Manipulator\Manipulator;
 
+/**
+ * @package Tolkam\DOM\Manipulator\Tests
+ * @author  Christoph Singer
+ * @author  Kanstantsin Kulesh
+ *
+ * @see     https://github.com/wasinger/htmlpagedom/blob/master/Tests/HtmlPageCrawlerTest.php
+ */
 class ManipulatorTest extends TestCase
 {
     /**
